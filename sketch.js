@@ -50,7 +50,8 @@ function draw() {
       gameState = "WAITING";
     }
 
-    if (gameState === "WAITING" && currentHand !== "未知") {
+    // 只有在比出剪刀、石頭、布時，才從等待狀態進入倒數狀態
+    if (gameState === "WAITING" && gestures.includes(currentHand)) {
       playerGesture = currentHand;
       gameState = "COUNTING";
       lastTime = millis();
@@ -58,7 +59,10 @@ function draw() {
     }
 
     if (gameState === "COUNTING") {
-      playerGesture = currentHand; // 更新目前玩家出的拳
+      // 在倒數過程中，只更新屬於遊戲手勢（剪刀石頭布）的狀態
+      if (gestures.includes(currentHand)) {
+        playerGesture = currentHand; 
+      }
       let elapsed = (millis() - lastTime) / 1000;
       timer = 3 - floor(elapsed);
       
@@ -163,7 +167,7 @@ function displayUI() {
   strokeWeight(4);
   
   if (gameState === "START_WAITING") {
-    text("請比出 OK 手勢開始\n(中指、無名指、小拇指舉起)", width / 2, 80);
+    text("請比出 OK 手勢開始", width / 2, 80);
   } else if (gameState === "WAITING") {
     text("請比出手勢開始遊戲", width / 2, 50);
   } else if (gameState === "RESULT") {
