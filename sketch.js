@@ -36,6 +36,11 @@ function draw() {
   scale(-1, 1); // 左右翻轉
   imageMode(CENTER);
   image(video, 0, 0, vw, vh);
+
+  // 繪製手部骨架連線
+  if (predictions.length > 0) {
+    drawSkeleton(predictions[0].landmarks, vw, vh);
+  }
   pop();
 
   if (predictions.length > 0) {
@@ -75,6 +80,41 @@ function draw() {
   }
 
   displayUI();
+}
+
+/**
+ * 繪製手部骨架線條
+ * @param {Array} landmarks 手部節點數據
+ * @param {Number} vw 畫面上影像的寬度
+ * @param {Number} vh 畫面上影像的高度
+ */
+function drawSkeleton(landmarks, vw, vh) {
+  stroke(0, 255, 0); // 設定線條顏色為綠色
+  strokeWeight(3);
+  
+  // 定義需要串接的五組線段編號
+  const fingerLines = [
+    [0, 1, 2, 3, 4],     // 大拇指
+    [5, 6, 7, 8],        // 食指
+    [9, 10, 11, 12],     // 中指
+    [13, 14, 15, 16],    // 無名指
+    [17, 18, 19, 20]     // 小指
+  ];
+
+  for (let linePoints of fingerLines) {
+    for (let i = 0; i < linePoints.length - 1; i++) {
+      let p1 = landmarks[linePoints[i]];
+      let p2 = landmarks[linePoints[i+1]];
+
+      // 將原始影像座標 (640x480) 映射到置中的 50% 畫布座標
+      let x1 = map(p1[0], 0, 640, -vw/2, vw/2);
+      let y1 = map(p1[1], 0, 480, -vh/2, vh/2);
+      let x2 = map(p2[0], 0, 640, -vw/2, vw/2);
+      let y2 = map(p2[1], 0, 480, -vh/2, vh/2);
+
+      line(x1, y1, x2, y2);
+    }
+  }
 }
 
 function analyzeGesture(landmarks, boundingBox) {
