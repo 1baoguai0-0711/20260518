@@ -1,7 +1,7 @@
 let handpose;
 let video;
 let predictions = [];
-let gameState = "WAITING"; // WAITING, COUNTING, RESULT, CHOOSING, FINISHED
+let gameState = "START_WAITING"; // START_WAITING, WAITING, COUNTING, RESULT, CHOOSING, FINISHED
 let timer = 3;
 let lastTime = 0;
 let playerGesture = "";
@@ -46,6 +46,10 @@ function draw() {
   if (predictions.length > 0) {
     let currentHand = analyzeGesture(predictions[0].landmarks, predictions[0].boundingBox);
     
+    if (gameState === "START_WAITING" && currentHand === "OK") {
+      gameState = "WAITING";
+    }
+
     if (gameState === "WAITING" && currentHand !== "未知") {
       playerGesture = currentHand;
       gameState = "COUNTING";
@@ -128,6 +132,7 @@ function analyzeGesture(landmarks, boundingBox) {
   const thumbUp = landmarks[4][1] < landmarks[2][1] - 20;
   const thumbDown = landmarks[4][1] > landmarks[2][1] + 20;
 
+  if (!indexUp && middleUp && ringUp && pinkyUp) return "OK";
   if (indexUp && middleUp && ringUp && pinkyUp) return "布";
   if (indexUp && middleUp && !ringUp && !pinkyUp) return "剪刀";
   if (!indexUp && !middleUp && !ringUp && !pinkyUp) {
@@ -157,7 +162,9 @@ function displayUI() {
   stroke(0);
   strokeWeight(4);
   
-  if (gameState === "WAITING") {
+  if (gameState === "START_WAITING") {
+    text("請比出 OK 手勢開始\n(中指、無名指、小拇指舉起)", width / 2, 80);
+  } else if (gameState === "WAITING") {
     text("請比出手勢開始遊戲", width / 2, 50);
   } else if (gameState === "RESULT") {
     // 背景遮罩
