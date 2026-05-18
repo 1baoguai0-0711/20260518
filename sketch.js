@@ -1,7 +1,7 @@
 let handpose;
 let video;
 let predictions = [];
-let gameState = "START_WAITING"; // START_WAITING, WAITING, COUNTING, RESULT, CHOOSING, FINISHED
+let gameState = "START_WAITING"; // START_WAITING, WAITING, COUNTING, RESULT, CHOOSING, FINISHED, CONTINUING
 let timer = 3;
 let lastTime = 0;
 let playerGesture = "";
@@ -79,8 +79,11 @@ function draw() {
 
     if (gameState === "CHOOSING") {
       if (currentHand === "繼續") {
-        gameState = "WAITING";
-        playerGesture = "";
+        gameState = "CONTINUING";
+        setTimeout(() => {
+          gameState = "WAITING";
+          playerGesture = "";
+        }, 2000); // 顯示繼續畫面 2 秒後重置
       } else if (currentHand === "結束") {
         gameState = "FINISHED";
       }
@@ -192,6 +195,14 @@ function displayUI() {
     fill(255);
     textSize(24);
     text("👍 大拇指朝上：繼續遊戲\n👎 大拇指朝下：結束離開", width / 2, height / 2 + 50);
+  } else if (gameState === "CONTINUING") {
+    fill(0, 0, 0, 180);
+    rect(0, 0, width, height);
+    fill(0, 255, 0);
+    textSize(64);
+    text("遊戲繼續！", width / 2, height / 2 - 20);
+    textSize(32);
+    text("準備下一局...", width / 2, height / 2 + 60);
   } else if (gameState === "FINISHED") {
     fill(0);
     rect(0, 0, width, height);
