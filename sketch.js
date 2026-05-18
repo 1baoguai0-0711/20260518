@@ -162,7 +162,7 @@ function displayUI() {
   } else if (gameState === "RESULT") {
     // 背景遮罩
     fill(0, 0, 0, 150);
-    rect(width / 2, height / 2, width, height);
+    rect(0, 0, width, height);
     
     fill(255);
     if (resultMessage === "恭喜勝利！") fill(0, 255, 0);
@@ -175,7 +175,7 @@ function displayUI() {
     textSize(32);
   } else if (gameState === "CHOOSING") {
     fill(0, 0, 0, 180);
-    rect(width / 2, height / 2, width, height);
+    rect(0, 0, width, height);
     fill(255, 255, 0);
     text("想再玩一場嗎？", width / 2, height / 2 - 40);
     fill(255);
@@ -183,7 +183,7 @@ function displayUI() {
     text("👍 大拇指朝上：繼續遊戲\n👎 大拇指朝下：結束離開", width / 2, height / 2 + 50);
   } else if (gameState === "FINISHED") {
     fill(0);
-    rect(width / 2, height / 2, width, height);
+    rect(0, 0, width, height);
     fill(255, 0, 0);
     textSize(64);
     text("遊戲結束", width / 2, height / 2);
