@@ -88,6 +88,11 @@ function draw() {
         gameState = "FINISHED";
       }
     }
+
+    // 在遊戲結束畫面，若比出 OK 則重置遊戲回到最初狀態
+    if (gameState === "FINISHED" && currentHand === "OK") {
+      gameState = "START_WAITING";
+    }
   }
 
   displayUI();
@@ -204,10 +209,13 @@ function displayUI() {
     textSize(32);
     text("準備下一局...", width / 2, height / 2 + 60);
   } else if (gameState === "FINISHED") {
-    fill(0);
+    fill(0, 0, 0, 220); // 使用深色半透明遮罩
     rect(0, 0, width, height);
     fill(255, 0, 0);
     textSize(64);
-    text("遊戲結束", width / 2, height / 2);
+    text("遊戲結束", width / 2, height / 2 - 20);
+    fill(255);
+    textSize(24);
+    text("感謝遊玩！\n(比出 OK 手勢重新開始)", width / 2, height / 2 + 60);
   }
   }
