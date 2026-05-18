@@ -1,7 +1,7 @@
 let handpose;
 let video;
 let predictions = [];
-let gameState = "WAITING"; // WAITING, COUNTING, RESULT
+let gameState = "WAITING"; // WAITING, COUNTING, RESULT, CHOOSING, FINISHED
 let timer = 3;
 let lastTime = 0;
 let playerGesture = "";
@@ -39,7 +39,7 @@ function draw() {
   pop();
 
   if (predictions.length > 0) {
-    let currentHand = analyzeGesture(predictions[0].landmarks);
+    let currentHand = analyzeGesture(predictions[0].landmarks, predictions[0].boundingBox);
     
     if (gameState === "WAITING" && currentHand !== "未知") {
       playerGesture = currentHand;
@@ -60,7 +60,16 @@ function draw() {
         computerGesture = random(gestures);
         determineWinner();
         gameState = "RESULT";
-        setTimeout(() => { gameState = "WAITING"; }, 3000); // 3秒後重置
+        setTimeout(() => { gameState = "CHOOSING"; }, 2000); // 顯示結果2秒後進入選擇
+      }
+    }
+
+    if (gameState === "CHOOSING") {
+      if (currentHand === "繼續") {
+        gameState = "WAITING";
+        playerGesture = "";
+      } else if (currentHand === "結束") {
+        gameState = "FINISHED";
       }
     }
   }
@@ -68,16 +77,24 @@ function draw() {
   displayUI();
 }
 
-function analyzeGesture(landmarks) {
+function analyzeGesture(landmarks, boundingBox) {
   // 判斷手指是否伸直 (y座標越小代表越高)
   const indexUp = landmarks[8][1] < landmarks[6][1];
   const middleUp = landmarks[12][1] < landmarks[10][1];
   const ringUp = landmarks[16][1] < landmarks[14][1];
   const pinkyUp = landmarks[20][1] < landmarks[18][1];
 
+  // 判斷大拇指 (相對於大拇指根部節點 2)
+  const thumbUp = landmarks[4][1] < landmarks[2][1] - 20;
+  const thumbDown = landmarks[4][1] > landmarks[2][1] + 20;
+
   if (indexUp && middleUp && ringUp && pinkyUp) return "布";
   if (indexUp && middleUp && !ringUp && !pinkyUp) return "剪刀";
-  if (!indexUp && !middleUp && !ringUp && !pinkyUp) return "石頭";
+  if (!indexUp && !middleUp && !ringUp && !pinkyUp) {
+    if (thumbUp) return "繼續";
+    if (thumbDown) return "結束";
+    return "石頭";
+  }
   return "未知";
 }
 
@@ -105,16 +122,30 @@ function displayUI() {
   } else if (gameState === "RESULT") {
     // 背景遮罩
     fill(0, 0, 0, 150);
-    rect(0, 0, width, height);
+    rect(width / 2, height / 2, width, height);
     
     fill(255);
     if (resultMessage === "恭喜勝利！") fill(0, 255, 0);
     if (resultMessage === "你輸了，再接再厲！") fill(255, 0, 0);
     
-    text("你出: " + playerGesture, width / 2, height / 2 - 60);
+    text("你出: " + playerGesture, width / 2, height / 2 - 80);
     text("電腦出: " + computerGesture, width / 2, height / 2);
     textSize(48);
-    text(resultMessage, width / 2, height / 2 + 80);
+    text(resultMessage, width / 2, height / 2 + 60);
     textSize(32);
+  } else if (gameState === "CHOOSING") {
+    fill(0, 0, 0, 180);
+    rect(width / 2, height / 2, width, height);
+    fill(255, 255, 0);
+    text("想再玩一場嗎？", width / 2, height / 2 - 40);
+    fill(255);
+    textSize(24);
+    text("👍 大拇指朝上：繼續遊戲\n👎 大拇指朝下：結束離開", width / 2, height / 2 + 50);
+  } else if (gameState === "FINISHED") {
+    fill(0);
+    rect(width / 2, height / 2, width, height);
+    fill(255, 0, 0);
+    textSize(64);
+    text("遊戲結束", width / 2, height / 2);
   }
-}
+  }
